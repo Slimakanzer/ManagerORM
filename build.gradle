@@ -1,0 +1,20 @@
+plugins {
+    id 'java'
+}
+
+group 'test'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.postgresql:postgresql:9.4-1201-jdbc41'
+    compile 'com.google.code.gson:gson:2.7'
+    testCompile 'org.postgresql:postgresql:9.4-1201-jdbc41'
+    testCompile 'com.google.code.gson:gson:2.7'
+
+}
