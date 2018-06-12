@@ -3,6 +3,7 @@
 public enum Effects {
     Fire("Fire"),
     Cold("Cold"),
+
     XRay("XRay");
 
     @PrimaryKey
@@ -14,6 +15,8 @@ public enum Effects {
     Effects(String name){
         this.name=name;
     }
+
+
 
     @Override
     public String toString() {

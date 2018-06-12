@@ -6,6 +6,8 @@ public  class Rays {
     @PrimaryKey
     @Column(name = "id")
     private int id;
+
+    @Collection
     @Column(name = "collection")
     private String collection;
 
@@ -20,6 +22,7 @@ public  class Rays {
 
     @Column(name = "Effects")
     private Effects effect;
+
 
     @Column(name = "x1")
     private double x1;
@@ -88,6 +91,10 @@ public  class Rays {
 
     public double getY2() {
         return y2;
+    }
+
+    public Color getColor() {
+        return color;
     }
 
     public void setPosition(double x1, double y1, double x2, double y2){

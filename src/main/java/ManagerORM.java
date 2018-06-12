@@ -1,14 +1,12 @@
 import com.google.gson.Gson;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
 interface ORMInterface<T>{
@@ -37,11 +35,13 @@ abstract class AbstractManagerORM<T> implements ORMInterface<T>{
     private Field fieldPrimaryKey;
     private Map<Field, String> fieldsWithType;
     private Gson gson;
+    private Class<?> aClass;
 
 
     public AbstractManagerORM(Class<?> tClass, String url, String login, String password){
         try{
             connection=DriverManager.getConnection(url, login, password);
+            this.aClass = tClass;
             AnnotationAnalyzer annotationAnalyzer = new AnnotationAnalyzer(tClass);
             this.nameTable=annotationAnalyzer.getNameTable();
             this.fields=annotationAnalyzer.getFields();
@@ -87,6 +87,10 @@ abstract class AbstractManagerORM<T> implements ORMInterface<T>{
     public Gson getGson() {
         return gson;
     }
+
+    public Class<?> getaClass() {
+        return aClass;
+    }
 }
 
 
@@ -127,7 +131,7 @@ public class ManagerORM<T> extends AbstractManagerORM<T> {
         try {
             getConnection().createStatement().execute(query);
         }catch (SQLException e){
-            e.printStackTrace();
+            //e.printStackTrace();
             System.out.println("Таблица "+getNameTable()+" уже существует");
         }
     }
@@ -256,6 +260,79 @@ public class ManagerORM<T> extends AbstractManagerORM<T> {
             }
 
         }
+
+    }
+
+
+    public T getElement(ResultSet resultSet){
+        Field[] fields = getaClass().getDeclaredFields();
+
+        try {
+            Object object=getaClass().newInstance();
+
+            Arrays.stream(fields).forEach(
+                    e->{
+                        if(e.getAnnotation(Column.class)!=null) {
+                            e.setAccessible(true);
+                            Object type = e.getType();
+
+                            try {
+                                try {
+                                    if (type == int.class) {
+                                        e.set(object, Integer.parseInt(resultSet.getString(e.getAnnotation(Column.class).name())));
+                                    } else if (type == double.class) {
+                                        e.set(object, Double.parseDouble(resultSet.getString(e.getAnnotation(Column.class).name())));
+                                    } else {
+                                        AnnotationAnalyzer annotationAnalyzer = new AnnotationAnalyzer(e.getType());
+                                        if (annotationAnalyzer.getNameTable() != null) {
+
+
+                                            annotationAnalyzer.getFieldPrimaryKey().setAccessible(true);
+                                            ManagerORM managerORM = new ManagerORM(e.getType(),DatabaseProtocol.url,DatabaseProtocol.login,DatabaseProtocol.password);
+                                            ResultSet resultSet1;
+
+                                                resultSet1 = managerORM.executeQuery("select * from "
+                                                        + managerORM.getNameTable()
+                                                        + " where "
+                                                        + managerORM.getPrimaryKey()
+                                                        + " = " + "'"+resultSet.getString(e.getAnnotation(Column.class).name())+"'"
+                                                );
+
+                                            while (resultSet1.next()){
+                                                e.set(object, managerORM.getElement(resultSet1));
+
+                                            }
+
+
+
+                                        } else {
+                                            e.set(object, getGson().fromJson(resultSet.getString(e.getAnnotation(Column.class).name()), e.getType()));
+                                        }
+                                    }
+                                }catch (IllegalAccessException e1){
+                                    e1.printStackTrace();
+                                }
+                            }catch (SQLException f){
+                                f.printStackTrace();
+                            }
+
+
+
+                        }
+
+                    }
+            );
+
+            return (T) object;
+
+
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
+        return null;
 
     }
 
