@@ -2,6 +2,13 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+
+/**
+ * Этот класс предназначен для парсинга аннотаций, в конструктор подаётся тип класса, который нужно распарсить
+ */
+
+
+
 public class AnnotationAnalyzer {
     private String nameTable;
     private ArrayList<String> nameColumns;
@@ -17,6 +24,11 @@ public class AnnotationAnalyzer {
         analyze();
 
     }
+
+    /**
+     * Этот метод определяет название таблицы
+     *
+     */
     private void nameTable(){
         try {
             nameTable = tClass.getDeclaredAnnotation(Table.class).name();
@@ -30,7 +42,7 @@ public class AnnotationAnalyzer {
     /**
      * Create names of columns
      *
-     *
+     *Этот метод определяет какое название у поля и есть ли тут PK и добавляет в nameColumns
      */
     private void nameColumns(){
 

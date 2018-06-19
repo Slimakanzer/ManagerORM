@@ -102,6 +102,10 @@ public class ManagerORM<T> extends AbstractManagerORM<T> {
     }
 
 
+    /**
+     * Этот метод создаёт в базе банных таблицу
+     *
+     */
     @Override
     public void create(){
         String query = "create table "+getNameTable()+"(\n";
@@ -146,6 +150,13 @@ public class ManagerORM<T> extends AbstractManagerORM<T> {
         return null;
     }
 
+
+    /**
+     *
+     *
+     * @param object - подаётся объект, который нужно сохранить в БД
+     * @return
+     */
     @Override
     public boolean insert(T object) {
         StringBuilder result = new StringBuilder();
@@ -171,11 +182,21 @@ public class ManagerORM<T> extends AbstractManagerORM<T> {
         return false;
     }
 
+    /**
+     * Не реализован
+     * @param object
+     * @return
+     */
     @Override
     public boolean update(T object) {
        return true;
     }
 
+    /**
+     * Удаляется объект по PK
+     * @param object
+     * @return
+     */
     @Override
     public boolean delete(T object) {
         StringBuilder result = new StringBuilder();
@@ -192,6 +213,11 @@ public class ManagerORM<T> extends AbstractManagerORM<T> {
         return false;
     }
 
+
+    /**
+     *
+     * Удаляется таблица
+     */
     @Override
     public void dropTable() {
         try {
@@ -202,6 +228,10 @@ public class ManagerORM<T> extends AbstractManagerORM<T> {
     }
 
 
+    /**
+     *
+     * Определяется тип поля для создания БД
+     */
     public String getType(Field field){
         Class type = field.getType();
 
@@ -227,6 +257,11 @@ public class ManagerORM<T> extends AbstractManagerORM<T> {
         }
     }
 
+
+    /**
+     *
+     *Определяется значение поля у данного объекта
+     */
     public String getValue(Field field, T object){
         Object result =null;
 
@@ -264,6 +299,11 @@ public class ManagerORM<T> extends AbstractManagerORM<T> {
     }
 
 
+    /**
+     * Этот метод собирает объект по частям из БД
+     * На вход метода подаётся ResultSet, где уже хранится кортеж
+     *
+     */
     public T getElement(ResultSet resultSet){
         Field[] fields = getaClass().getDeclaredFields();
 
