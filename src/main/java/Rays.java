@@ -39,9 +39,25 @@ public  class Rays {
     @Column(name = "color")
     public Color color = Color.RED;
 
-//    @Column(name = "Rays")
-//    public Rays rays = null;
+    @Column(name = "Rays")
+    public Rays rays = null;
 
+
+    public Rays(int id, Rays rays){
+        this.id=id;
+        this.collection="col";
+        this.name="Базовый";
+        this.speed=0.001;
+        this.damage=0;
+        this.effect=Effects.Fire;
+        this.x1=0;
+        this.y1=0;
+        this.x2=1;
+        this.y2=1;
+        this.color= Color.BLACK;
+        this.rays=rays;
+
+    }
 
     public Rays(){
         this.id=1;
