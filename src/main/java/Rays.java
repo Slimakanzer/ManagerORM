@@ -39,6 +39,9 @@ public  class Rays {
     @Column(name = "color")
     public Color color = Color.RED;
 
+//    @Column(name = "Rays")
+//    public Rays rays = null;
+
 
     public Rays(){
         this.id=1;

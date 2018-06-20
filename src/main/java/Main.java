@@ -10,7 +10,7 @@ public class Main {
 
         managerORM.create();
         managerORM.insert(new Rays());
-        managerORM.dropTable();
+//        managerORM.dropTable();
 
     }
 }

@@ -248,7 +248,9 @@ public class ManagerORM<T> extends AbstractManagerORM<T> {
                 ManagerORM managerORM = new ManagerORM(type,DatabaseProtocol.url,DatabaseProtocol.login,DatabaseProtocol.password);
 
                 getFieldsWithType().put(field, managerORM.getNameTable());
-                managerORM.create();
+                if(getaClass() != type) {
+                    managerORM.create();
+                }
                 return managerORM.getType(annotationAnalyzer.getFieldPrimaryKey());
             }else {
                 return "jsonb";
@@ -268,7 +270,8 @@ public class ManagerORM<T> extends AbstractManagerORM<T> {
         try {
             result = field.get(object);
         }catch (IllegalAccessException e){
-            e.printStackTrace();
+            //e.printStackTrace();
+            System.out.println("Нулевое значение");
         }
 
         if(result instanceof String ){
@@ -277,10 +280,13 @@ public class ManagerORM<T> extends AbstractManagerORM<T> {
             return Integer.toString((int)result);
         }else if (Double.class.isInstance(result)){
             return Double.toString((double)result);
+        }else if (result==null) {
+            return null;
+
         }else {
 
-            AnnotationAnalyzer annotationAnalyzer = new AnnotationAnalyzer(field.getType());
-            if(annotationAnalyzer.getNameTable()!=null){
+                AnnotationAnalyzer annotationAnalyzer = new AnnotationAnalyzer(field.getType());
+                if(annotationAnalyzer.getNameTable()!=null){
 
                     annotationAnalyzer.getFieldPrimaryKey().setAccessible(true);
 
@@ -290,11 +296,11 @@ public class ManagerORM<T> extends AbstractManagerORM<T> {
 
                     return managerORM.getValue(annotationAnalyzer.getFieldPrimaryKey(), result);
 
-            }else {
-                return "'"+getGson().toJson(result)+"'";
-            }
+                }else {
+                    return "'"+getGson().toJson(result)+"'";
+                }
 
-        }
+            }
 
     }
 
