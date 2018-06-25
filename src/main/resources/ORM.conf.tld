@@ -2,7 +2,7 @@
 <config>
     <protocol>jdbc:postgresql://</protocol>
     <host>localhost:5432/</host>
-    <database>DATABASE</database>
-    <login>LOGIN</login>
-    <password>PASSWORD</password>
+    <database>postgres</database>
+    <login>postgres</login>
+    <password>postgres</password>
 </config>

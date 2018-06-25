@@ -23,6 +23,12 @@ public  class Rays {
     @Column(name = "Effects")
     private Effects effect;
 
+    @Column(name = "float_test")
+    private float fl;
+
+    @Column(name = "boolean_test")
+    private boolean bool;
+
 
     @Column(name = "x1")
     private double x1;
@@ -56,6 +62,8 @@ public  class Rays {
         this.y2=1;
         this.color= Color.BLACK;
         this.rays=rays;
+        this.fl=0.35f;
+        this.bool=true;
 
     }
 
@@ -71,13 +79,15 @@ public  class Rays {
         this.x2=1;
         this.y2=1;
         this.color= Color.BLACK;
+        this.fl=0.35f;
+        this.bool=true;
 
     }
 
     public Rays(String name, int damage, Effects effect, double speed){
         this.damage=damage;
         this.name=name;
-        this.effect=effect;
+        //this.effect=effect;
         this.speed=speed;
     }
     public int getDamage() {

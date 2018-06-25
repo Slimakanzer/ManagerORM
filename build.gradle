@@ -14,7 +14,5 @@ repositories {
 dependencies {
     compile 'org.postgresql:postgresql:9.4-1201-jdbc41'
     compile 'com.google.code.gson:gson:2.7'
-    testCompile 'org.postgresql:postgresql:9.4-1201-jdbc41'
-    testCompile 'com.google.code.gson:gson:2.7'
 
 }

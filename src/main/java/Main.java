@@ -7,10 +7,10 @@ public class Main {
         DatabaseProtocol.getData();
 
         ManagerORM<Rays> managerORM = new ManagerORM<>(Rays.class, DatabaseProtocol.url, DatabaseProtocol.login, DatabaseProtocol.password);
-
         managerORM.create();
         managerORM.insert(new Rays(1, new Rays(2, null)));
-//        managerORM.dropTable();
+
+        //managerORM.dropTable();
 
     }
 }

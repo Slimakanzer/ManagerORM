@@ -13,7 +13,7 @@ interface ORMInterface<T>{
 
     ResultSet executeQuery(String query);
 
-    void create();
+    void create() throws TableAlreadyExistSQLException;
 
     boolean insert(T object);
 
@@ -21,7 +21,7 @@ interface ORMInterface<T>{
 
     boolean delete(T object);
 
-    void dropTable();
+    void dropTable() throws TableAlreadyExistSQLException;
 
 }
 
@@ -36,6 +36,8 @@ abstract class AbstractManagerORM<T> implements ORMInterface<T>{
     private Map<Field, String> fieldsWithType;
     private Gson gson;
     private Class<?> aClass;
+    protected static final String TABLE_ALREADY_EXIST_CODE="42P07";
+    protected static final String OBJECT_ALREADY_EXIST_CODE="23505";
 
 
     public AbstractManagerORM(Class<?> tClass, String url, String login, String password){
@@ -51,7 +53,7 @@ abstract class AbstractManagerORM<T> implements ORMInterface<T>{
             this.fieldsWithType = new HashMap<>();
             this.gson=new Gson();
         }catch (SQLException e){
-            e.printStackTrace();
+            System.out.println("Нет подключения к БД");
         }
     }
 
@@ -131,12 +133,20 @@ public class ManagerORM<T> extends AbstractManagerORM<T> {
         }else {
             query=query.substring(0,query.length()-2)+")";
         }
-        System.out.println(query);
         try {
             getConnection().createStatement().execute(query);
+            System.out.println(query);
         }catch (SQLException e){
             //e.printStackTrace();
-            System.out.println("Таблица "+getNameTable()+" уже существует");
+            if (e.getSQLState().equals(TABLE_ALREADY_EXIST_CODE)) {
+
+                try {
+                    throw new TableAlreadyExistSQLException(getNameTable());
+                } catch (TableAlreadyExistSQLException e1) {
+                }
+            }else {
+                System.out.println("Какие-то проблемы с БД");
+            }
         }
     }
 
@@ -177,7 +187,13 @@ public class ManagerORM<T> extends AbstractManagerORM<T> {
             return true;
         }catch (SQLException e){
             //e.printStackTrace();
-            System.out.println("Объект в таблице "+getNameTable()+" уже существует");
+
+            if(e.getSQLState().equals(OBJECT_ALREADY_EXIST_CODE)){
+                try{
+                    throw new ObjectAlreadyExistSQL(getNameTable());
+                }catch (ObjectAlreadyExistSQL e1){
+                }
+            }
         }
         return false;
     }
@@ -219,11 +235,10 @@ public class ManagerORM<T> extends AbstractManagerORM<T> {
      * Удаляется таблица
      */
     @Override
-    public void dropTable() {
+    public void dropTable(){
         try {
             getConnection().createStatement().executeUpdate("drop table "+getNameTable());
         }catch (SQLException e){
-            e.printStackTrace();
         }
     }
 
@@ -236,11 +251,15 @@ public class ManagerORM<T> extends AbstractManagerORM<T> {
         Class type = field.getType();
 
         if(type==String.class){
-            return "varchar(30)";
+            return "text";
         }else if (type==int.class){
             return "integer";
-        }else if (type==double.class){
+        }else if (type==double.class) {
             return "double precision";
+        }else if (type==boolean.class) {
+            return "boolean";
+        }else if(type==float.class){
+            return "real";
         }else{
             AnnotationAnalyzer annotationAnalyzer = new AnnotationAnalyzer(type);
 
@@ -251,12 +270,21 @@ public class ManagerORM<T> extends AbstractManagerORM<T> {
                 if(getaClass() != type) {
                     managerORM.create();
                 }
-                return managerORM.getType(annotationAnalyzer.getFieldPrimaryKey());
+                try {
+                    return managerORM.getType(annotationAnalyzer.getFieldPrimaryKey());
+                }catch (NullPointerException e){
+                    try{
+                        throw new PrimaryKeyNotFoundException(managerORM, getNameTable());
+                    }catch (PrimaryKeyNotFoundException e1){
+                        System.exit(1);
+                    }
+                }
             }else {
                 return "jsonb";
             }
 
         }
+        return null;
     }
 
 
@@ -278,8 +306,12 @@ public class ManagerORM<T> extends AbstractManagerORM<T> {
             return "'"+result+"'";
         }else if (Integer.class.isInstance(result)){
             return Integer.toString((int)result);
-        }else if (Double.class.isInstance(result)){
-            return Double.toString((double)result);
+        }else if (Double.class.isInstance(result)) {
+            return Double.toString((double) result);
+        }else if (Boolean.class.isInstance(result)) {
+            return Boolean.toString((boolean) result);
+        }else if (Float.class.isInstance(result)){
+            return Float.toString((float)result);
         }else if (result==null) {
             return null;
 
