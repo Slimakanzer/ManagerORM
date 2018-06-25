@@ -1,6 +1,6 @@
-public class ObjectAlreadyExistSQL extends Exception {
+public class ObjectAlreadyExistSQLException extends Exception {
     private String nameTable;
-    ObjectAlreadyExistSQL(String nameTable){
+    ObjectAlreadyExistSQLException(String nameTable){
         this.nameTable=nameTable;
         System.out.println(getMessage());
     }
