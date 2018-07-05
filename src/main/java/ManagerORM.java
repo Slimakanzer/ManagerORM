@@ -136,6 +136,7 @@ public class ManagerORM<T> extends AbstractManagerORM<T> {
             System.out.println(query);
         }catch (SQLException e){
             //e.printStackTrace();
+            System.out.println(e.getSQLState());
             if (e.getSQLState().equals(TABLE_ALREADY_EXIST_CODE)) {
 
                 try {
@@ -173,7 +174,7 @@ public class ManagerORM<T> extends AbstractManagerORM<T> {
         getFields().stream().forEach(
                 e-> {
                     e.setAccessible(true);
-                    result.append(getValue(e, object)+",");
+                    result.append(getValue(e, object, true)+",");
                 }
         );
 
@@ -181,7 +182,7 @@ public class ManagerORM<T> extends AbstractManagerORM<T> {
         result.append(")");
         try {
             System.out.println(result.toString());
-            getConnection().createStatement().executeUpdate(result.toString());
+            getConnection().createStatement().execute(result.toString());
             return true;
         }catch (SQLException e){
             //e.printStackTrace();
@@ -203,7 +204,27 @@ public class ManagerORM<T> extends AbstractManagerORM<T> {
      */
     @Override
     public boolean update(T object) {
-       return true;
+       StringBuilder result = new StringBuilder();
+       result.append("update "+ getNameTable()+" set ");
+       getFields().forEach(
+               e->{
+                   e.setAccessible(true);
+                   String nameColumn = e.getAnnotation(Column.class).name();
+                   String value = getValue(e, object, false);
+                   result.append(nameColumn +" = "+value+" ,");
+
+               }
+       );
+       result.deleteCharAt(result.length()-1);
+       result.append(" where "+getPrimaryKey()+" = "+getValue(getFieldPrimaryKey(), object, false));
+        System.out.println(result.toString());
+       try{
+           getConnection().createStatement().executeUpdate(result.toString());
+           return true;
+       }catch (SQLException e){
+           System.out.println("Ошибка при update");
+           return false;
+       }
     }
 
     /**
@@ -215,7 +236,7 @@ public class ManagerORM<T> extends AbstractManagerORM<T> {
     public boolean delete(T object) {
         StringBuilder result = new StringBuilder();
 
-        result.append("delete from "+getNameTable()+" where "+getPrimaryKey()+" = "+getValue(getFieldPrimaryKey(), object));
+        result.append("delete from "+getNameTable()+" where "+getPrimaryKey()+" = "+getValue(getFieldPrimaryKey(), object, true));
 
         try {
             getConnection().createStatement().executeUpdate(result.toString());
@@ -290,7 +311,7 @@ public class ManagerORM<T> extends AbstractManagerORM<T> {
      *
      *Определяется значение поля у данного объекта
      */
-    public String getValue(Field field, T object){
+    public String getValue(Field field, T object, boolean select){
         Object result =null;
 
         try {
@@ -322,9 +343,13 @@ public class ManagerORM<T> extends AbstractManagerORM<T> {
 
 
                     ManagerORM managerORM = new ManagerORM(field.getType(),DatabaseProtocol.url,DatabaseProtocol.login,DatabaseProtocol.password);
-                    managerORM.insert(result);
-
-                    return managerORM.getValue(annotationAnalyzer.getFieldPrimaryKey(), result);
+                    if (select) {
+                        managerORM.insert(result);
+                        return managerORM.getValue(annotationAnalyzer.getFieldPrimaryKey(), result, true);
+                    }else {
+                        managerORM.update(result);
+                        return managerORM.getValue(annotationAnalyzer.getFieldPrimaryKey(), result, false);
+                    }
 
                 }else {
                     return "'"+getGson().toJson(result)+"'";

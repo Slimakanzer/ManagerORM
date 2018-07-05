@@ -49,6 +49,10 @@ public  class Rays {
     public Rays rays = null;
 
 
+    @Column(name = "Ladys")
+    public Ladys ladys;
+
+
     public Rays(int id, Rays rays){
         this.id=id;
         this.collection="col";
@@ -64,6 +68,7 @@ public  class Rays {
         this.rays=rays;
         this.fl=0.35f;
         this.bool=true;
+        this.ladys=Ladys.three;
 
     }
 
@@ -82,6 +87,21 @@ public  class Rays {
         this.fl=0.35f;
         this.bool=true;
 
+    }
+    public Rays(int id){
+        this.id=id;
+        this.collection="col";
+        this.name="Базовый";
+        this.speed=1010101;
+        this.damage=0;
+        this.effect=Effects.Fire;
+        this.x1=0;
+        this.y1=0;
+        this.x2=1;
+        this.y2=1;
+        this.color= Color.BLACK;
+        this.fl=0.35f;
+        this.bool=true;
     }
 
     public Rays(String name, int damage, Effects effect, double speed){
@@ -131,5 +151,9 @@ public  class Rays {
         this.x2=x2;
         this.y1=y1;
         this.y2=y2;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }
